@@ -1,75 +1,78 @@
-//Initial array of animals
-var animals = ["Dog", "Cat", "Lion", "Panda"];
+var myData = ["lasagne", "pizza", "taco", "sushi", "steak", "mac and cheese", "pasta"];
 
- // displayAnimalInfo function re-renders the HTML to display the appropriate content
- function displayAnimalInfo() {
+$(document).ready(function() {
+    renderButton();
+    function renderButton() {
+        $("#allbuttons").empty();
 
-    var animal = $(this).attr("data-name");
-    var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
-    animal + "&api_key=dc6zaTOxFJmzC&limit=10";
+        for (var i=0 ; i < myData.length; i++) {
 
-    // Creating an AJAX call for the specific animal button being clicked
-    $.ajax({
-      url: queryURL,
-      method: "GET"
-    }).then(function(response) {
-        console.log(response);
-        // Creating a div to hold the animal
-        var animalDiv = $("<div class='animal'>");
+            var newButton = $("<button>");
+            newButton.addClass("itembutton");
+            newButton.addClass("btn btn-success");
+            newButton.text(myData[i]);
+            newButton.attr("data-name", myData[i]);
+            $("#allbuttons").append(newButton);
+        }
+    }
 
-        var imgURL = response.data;
+    $("#addbutton").on("click",  function(event) {
+        
+        event.preventDefault();
+        var addedData = $("#userinput").val().trim();
+        if (addedData != "") {
+            myData.push(addedData);
+            renderButton();
+            $("#userinput").val(" ");
+        }
+    });  
 
-        for (var i = 0; i < imgURL.length; i++) {
-            var image = $("<img>").attr("src", imgURL);
-            // Appending the image
-            animalDiv.append(image);
+    $(document).on("click", ".itembutton", displayInfo);
+
+    function displayInfo() {
+        var itemName = $(this).attr("data-name");
+        var queryURL = "https://api.giphy.com/v1/gifs/search?q=food+" + itemName + "&rating=g&limit=10&api_key=TVxQvzKbz76RUCSYfQDXsZU5CHvX6uxY";
+        $("#mainimages").empty();
+
+        $.ajax ({
+            url: queryURL,
+            method: "GET"
+        }) .then(function(response) {
+            console.log(response);
+
+            var results = response.data;
+
+            for (var i=0; i<results.length; i++) {
+
+                var dataImage = $("<img>");
+                dataImage.attr("src", results[i].images.fixed_height_still.url);
+                dataImage.attr("data-still", results[i].images.fixed_height_still.url);
+                dataImage.attr("data-animate", results[i].images.fixed_height.url);
+                dataImage.addClass("gif");
+                dataImage.attr("data-state", "still");
+    
+                var newItemdiv = $('<div class="newItem">');
+                var gifRating = results[i].rating;
+                var divRating = $("<p>").text("Rating: " + gifRating);
+                
+                newItemdiv.append(divRating);
+                newItemdiv.append(dataImage);
+    
+                $("#mainimages").prepend(newItemdiv);
+            }
+        }); 
+    }
+
+    $("#mainimages").on("click", ".gif", function() {
+        var state = $(this).attr("data-state");
+        if (state === "still") {
+            $(this).attr("src", $(this).attr("data-animate"));
+            $(this).attr("data-state", "animate");
         }
 
-        // Putting the entire movie above the previous movies
-        $("#animal-view").prepend(animalDiv);
-      });
-
-    }
-
-    // Function for displaying animal data
-    function renderButtons() {
-
-      // Deleting the animals prior to adding new animals
-      // (this is necessary otherwise you will have repeat buttons)
-      $("#buttons-view").empty();
-
-      // Looping through the array of animals
-      for (var i = 0; i < animals.length; i++) {
-
-        // Then dynamicaly generating buttons for each animal in the array
-        // This code $("<button>") is all jQuery needs to create the beginning and end tag. (<button></button>)
-        var a = $("<button>");
-        // Adding a class of animal-btn to our button
-        a.addClass("animal-btn");
-        // Adding a data-attribute
-        a.attr("data-name", animals[i]);
-        // Providing the initial button text
-        a.text(animals[i]);
-        // Adding the button to the buttons-view div
-        $("#buttons-view").append(a);
-      }
-    }
-
-    // This function handles events where an animal button is clicked
-    $("#add-animal").on("click", function(event) {
-      event.preventDefault();
-      // This line grabs the input from the textbox
-      var animal = $("#animal-input").val().trim();
-
-      // Adding animal from the textbox to our array
-      animals.push(animal);
-
-      // Calling renderButtons which handles the processing of our animal array
-      renderButtons();
+        else if (state === "animate") {
+            $(this).attr("src", $(this).attr("data-still"));
+            $(this).attr("data-state", "still");
+        }
     });
-
-    // Adding a click event listener to all elements with a class of "animal-btn"
-    $(document).on("click", ".animal-btn", displayAnimalInfo);
-
-    // Calling the renderButtons function to display the intial buttons
-    renderButtons();
+})

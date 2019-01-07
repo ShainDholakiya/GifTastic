@@ -1,0 +1,26 @@
+body {
+    background-color: lightslategray;
+    text-align: center;
+}
+h1 {
+    color: white;
+    font-size: 55px;
+}
+.container-fluid {
+    margin: 25px;
+}
+button {
+    display: inline-block;
+    font-size: 25px;
+    margin: 5px;
+}
+#addtext {
+    font-size: 30px;
+    margin-bottom: 10px;
+    color: blue;
+}
+.newItem {
+    display: block;
+    float: left;
+    margin: 25px;
+}
